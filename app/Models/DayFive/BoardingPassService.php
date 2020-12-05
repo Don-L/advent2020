@@ -1,6 +1,6 @@
 <?php 
 
-namespace App\Models;
+namespace App\Models\DayFive;
 
 class BoardingPassService
 {
@@ -27,8 +27,6 @@ class BoardingPassService
     {
         $row_index = $this->rowIndexForPass($pass);
         $col_index = $this->colIndexForPass($pass);
-        echo 'row' . $row_index.PHP_EOL;
-        echo 'col' . $col_index.PHP_EOL;
         $seat_id   = ($row_index * 8) + $col_index;
 
         return $seat_id;
@@ -52,41 +50,41 @@ class BoardingPassService
 
     private function iterateBounds(string $row_or_col_string, array $bounds): int
     {
-        echo 'string: ' . $row_or_col_string . ' bounds: ' . $bounds[0] . ',' . $bounds[1] . PHP_EOL;
-        if (strlen($row_or_col_string) === 0) {return $bounds[0];}
+        if ($bounds[0] === $bounds[1]) {return $bounds[0];}
 
-        $current_row_or_col_string = substr($row_or_col_string, 0, 1);
-        $next_row_or_col_string    = substr($row_or_col_string, 1);
+        $upper_or_lower_signifier = substr($row_or_col_string, 0, 1);
+        $next_row_or_col_string   = substr($row_or_col_string, 1);
 
         return  $this->iterateBounds(
                     $next_row_or_col_string,
                     $this->getBoundsForIndexAndRowOrColumnString(
                         $bounds,
-                        $current_row_or_col_string
+                        $upper_or_lower_signifier
                     )
                 );
     }
 
-    private function getBoundsForIndexAndRowOrColumnString(array $bounds, string $string): array
+    private function getBoundsForIndexAndRowOrColumnString(
+         array $bounds,
+        string $upper_or_lower_signifier
+    ): array
     {
         return [
             'F' => function($bounds){return $this->lowerHalfBounds($bounds);},
             'B' => function($bounds){return $this->upperHalfBounds($bounds);},
             'L' => function($bounds){return $this->lowerHalfBounds($bounds);},
             'R' => function($bounds){return $this->upperHalfBounds($bounds);},
-        ][$string]($bounds);
+        ][$upper_or_lower_signifier]($bounds);
     }
 
     private function lowerHalfBounds(array $bounds): array
     {
-        $mid = $bounds[0] + (int) (($bounds[1] - $bounds[0]) / 2);
-        return [$bounds[0], $bounds[0] + $mid];
+        return [$bounds[0], $bounds[0] + ((int) floor(($bounds[1] - $bounds[0]) / 2))];
     }
 
     private function upperHalfBounds(array $bounds): array
     {
-        $mid = $bounds[0] + (int) (($bounds[1] - $bounds[0]) / 2);
-        return [$bounds[0] + $mid, $bounds[1]];
+        return [$bounds[1] - ((int) floor(($bounds[1] - $bounds[0]) / 2)), $bounds[1]];
     }
 
 }
